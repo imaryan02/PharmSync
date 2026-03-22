@@ -67,6 +67,32 @@ export default function AppLayout() {
         <Outlet />
       </div>
 
+      {/* Desktop Footer (Hidden on mobile to not conflict with bottom nav) */}
+      <footer className="hidden sm:block border-t border-slate-200 bg-white py-8 mt-auto z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-50 rounded-lg">
+                <Activity className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="font-bold text-slate-800 tracking-tight">PharmSync</span>
+              <span className="text-sm text-slate-500 ml-2">© {new Date().getFullYear()} All rights reserved.</span>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-medium text-slate-500">
+              <Link to="/inventory" className="hover:text-blue-600 transition-colors">Inventory Hub</Link>
+              <Link to="/orders/new" className="hover:text-blue-600 transition-colors">Point of Sale</Link>
+              <Link to="/dashboard" className="hover:text-blue-600 transition-colors">Overview</Link>
+              <Link to="/stores" className="hover:text-blue-600 transition-colors">Store Settings</Link>
+            </div>
+            
+            <div className="text-xs text-slate-400 font-medium">
+              Made for modern pharmacies
+            </div>
+          </div>
+        </div>
+      </footer>
+
       {/* Mobile Bottom Navigation Navbar (Hidden on sm screens) */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 pb-safe">
         <div className="flex items-center justify-around h-16 px-2">

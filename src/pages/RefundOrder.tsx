@@ -146,7 +146,7 @@ export default function RefundOrder() {
         .from('refunds')
         .insert([{
           order_id: order.id,
-          created_by: user.id,
+          // created_by omitted — FK references employees table, not auth.users
           reason: reason.trim() || null
         }])
         .select()

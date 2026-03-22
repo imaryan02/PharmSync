@@ -103,11 +103,12 @@ export interface StockAdjustment {
 
 export interface AuditLog {
   id: string;
-  clinic_id: string | null;
+  user_id: string | null;
   action: string;
   entity_type: string;
-  actor_id: string | null;
-  actor_type: string;
+  entity_id: string | null;
   metadata: any | null;
   created_at: string;
+  employee_id: string | null;
+  actor_type: string;
 }

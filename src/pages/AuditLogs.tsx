@@ -9,7 +9,6 @@ import { ArrowLeft, AlertCircle, List, Filter } from 'lucide-react';
 
 export default function AuditLogs() {
   const { user } = useAuth();
-  const { activeStore } = useStore();
   const navigate = useNavigate();
 
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -25,24 +24,27 @@ export default function AuditLogs() {
     } else {
       setLoading(false);
     }
-  }, [user, activeStore]);
+  }, [user]);
 
   const fetchLogs = async () => {
-    if (!activeStore) {
+    if (!user) {
       setLoading(false);
       return;
     }
     
     setLoading(true);
     
+    // Fetch logs scoped to user
     const { data, error } = await supabase
       .from('audit_logs')
       .select('*')
-      .eq('clinic_id', activeStore.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (!error && data) {
+    if (error) {
+      console.error('AuditLogs fetch error:', JSON.stringify(error, null, 2));
+    } else if (data) {
       setLogs(data as AuditLog[]);
     }
     setLoading(false);

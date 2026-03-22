@@ -110,7 +110,7 @@ export default function CreateOrder() {
         .from('orders')
         .insert([{
           clinic_id: activeStore.id,
-          created_by: user.id,
+          // created_by omitted — FK references employees table, not auth.users
           total_amount: totalAmount,
           status: 'active'
         }])
@@ -135,7 +135,8 @@ export default function CreateOrder() {
 
         if (itemError) throw itemError;
 
-        // 3. Allocate batches (FEFO)
+        // 3. Allocate batches (FEFO — First Expired, First Out)
+        const today = new Date().toISOString().split('T')[0];
         const { data: batches, error: batchError } = await supabase
           .from('batches')
           .select('*')
@@ -145,6 +146,13 @@ export default function CreateOrder() {
           .order('expiry_date', { ascending: true });
 
         if (batchError) throw batchError;
+
+        // Warn if oldest available batch is already expired
+        const oldestBatch = (batches as Batch[])[0];
+        if (oldestBatch && oldestBatch.expiry_date < today) {
+          console.warn(`⚠️ Expired batch being used for ${item.name}: expiry ${oldestBatch.expiry_date}`);
+          // Non-blocking — show warning but continue (some pharmacies allow selling expired with consent)
+        }
 
         let remainingToAllocate = item.quantity;
         

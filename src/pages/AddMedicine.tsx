@@ -25,13 +25,13 @@ export default function AddMedicine() {
     setLoading(true);
 
     try {
-      // Basic duplicate check
+      // Duplicate check — use .maybeSingle() so no 406 when medicine doesn't exist
       const { data: existing } = await supabase
         .from('medicines')
         .select('id')
         .eq('owner_id', user?.id)
         .ilike('name', name.trim())
-        .single();
+        .maybeSingle();
 
       if (existing) {
         throw new Error('A medicine with this name already exists.');
@@ -55,32 +55,7 @@ export default function AddMedicine() {
       showSuccess('Medicine added successfully!');
       navigate('/medicines');
     } catch (err: any) {
-      if (err.code === 'PGRST116') {
-         // This means no rows returned from the duplicate check, which is good!
-         try {
-            const { error: insertError } = await supabase
-            .from('medicines')
-            .insert([
-              {
-                name: name.trim(),
-                composition: composition.trim() || null,
-                company: company.trim() || null,
-                category: category.trim() || null,
-                mrp: mrp ? parseFloat(mrp) : null,
-                owner_id: user?.id,
-              }
-            ]);
-
-          if (insertError) throw insertError;
-
-          showSuccess('Medicine added successfully!');
-          navigate('/medicines');
-         } catch (insertErr: any) {
-            showError(insertErr.message || 'Failed to add medicine');
-         }
-      } else {
-        showError(err.message || 'Failed to add medicine');
-      }
+      showError(err.message || 'Failed to add medicine');
     } finally {
       setLoading(false);
     }

@@ -102,7 +102,7 @@ export default function StockEntry() {
             medicine_id: medicineId,
             batch_id: batchData.id,
             quantity: qty,
-            created_by: user?.id,
+            // created_by omitted — FK references employees table, not auth.users
           }
         ]);
 
@@ -115,12 +115,9 @@ export default function StockEntry() {
         .select('*')
         .eq('clinic_id', activeStore.id)
         .eq('medicine_id', medicineId)
-        .single();
+        .maybeSingle();
 
-      if (invCheckError && invCheckError.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is fine
-        throw invCheckError;
-      }
+      if (invCheckError) throw invCheckError;
 
       if (invData) {
         // Update existing

@@ -127,7 +127,13 @@ export default function AppLayout() {
               <Link to="/dashboard" className="hover:text-blue-600 transition-colors">Dashboard</Link>
               <Link to="/stores" className="hover:text-blue-600 transition-colors">Store Settings</Link>
             </div>
-            <div className="text-xs text-slate-400 font-medium">Made for modern pharmacies</div>
+            <div className="text-xs text-slate-400 font-medium flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+              <span>Made for modern pharmacies</span>
+              <span className="hidden sm:inline">&bull;</span>
+              <span>
+                Created by <a href="https://www.linkedin.com/in/imaryan02/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 transition-colors underline decoration-2 underline-offset-2">Aryan Gupta</a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>

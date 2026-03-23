@@ -213,7 +213,8 @@ export default function CreateOrder() {
         .from('orders')
         .insert([{
           clinic_id: activeStore.id,
-          total_amount: billing.finalTotal,
+          final_amount: billing.finalTotal,
+          discount_amount: billing.discountAmount > 0 ? billing.discountAmount : null,
           status: 'active',
           patient_name: customerName.trim() || null,
           created_at: new Date().toISOString(),

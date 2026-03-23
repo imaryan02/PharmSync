@@ -123,11 +123,11 @@ export default function Stores() {
         )}
       </main>
 
-      {/* Mobile FAB */}
-      <div className="fixed bottom-6 right-6 sm:hidden">
+      {/* Mobile Add FAB */}
+      <div className="fixed bottom-24 right-5 sm:hidden z-20">
         <Link
           to="/stores/new"
-          className="flex items-center justify-center h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:scale-95 transition-transform"
+          className="flex items-center justify-center h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-transform"
         >
           <Plus className="h-6 w-6" />
         </Link>

@@ -112,10 +112,10 @@ export default function Dashboard() {
     }
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    const { data: todayOrd } = await supabase.from('orders').select('total_amount').eq('clinic_id', activeStore.id).gte('created_at', today.toISOString());
+    const { data: todayOrd } = await supabase.from('orders').select('*').eq('clinic_id', activeStore.id).eq('status', 'active').gte('created_at', today.toISOString());
     if (todayOrd) {
       setOrdersToday(todayOrd.length);
-      setRevenueToday(todayOrd.reduce((a, o) => a + o.total_amount, 0));
+      setRevenueToday(todayOrd.reduce((a, o) => a + (Number(o.final_amount) || Number(o.total_amount) || 0), 0));
     }
 
     const { data: recent } = await supabase.from('orders').select('*').eq('clinic_id', activeStore.id).order('created_at', { ascending: false }).limit(8);
@@ -288,7 +288,7 @@ export default function Dashboard() {
                             <p className="text-xs text-slate-400">{fmtDate(order.created_at)} · {fmtTime(order.created_at)}</p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-base font-extrabold text-slate-900">₹{order.total_amount.toFixed(0)}</span>
+                            <span className="text-base font-extrabold text-slate-900">₹{(Number(order.final_amount) || Number(order.total_amount) || 0).toFixed(0)}</span>
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize hidden sm:inline ${badge}`}>{order.status}</span>
                             <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
                           </div>

@@ -45,7 +45,7 @@ export default function OrderListItem({ order }: OrderListItemProps) {
       </div>
       <div className="flex items-center gap-3">
         <span className="text-base font-bold text-slate-900">
-          ₹{order.total_amount.toFixed(2)}
+          ₹{(Number(order.final_amount) || Number(order.total_amount) || 0).toFixed(2)}
         </span>
         <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
       </div>

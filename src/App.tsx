@@ -30,6 +30,7 @@ import AuditLogs from './pages/AuditLogs';
 import Profile from './pages/Profile';
 import EditStore from './pages/EditStore';
 import EditMedicine from './pages/EditMedicine';
+import Analytics from './pages/Analytics';
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
               <Route path="/orders/:id/refund" element={<RefundOrder />} />
               <Route path="/stock-adjustments" element={<StockAdjustments />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
+              <Route path="/analytics" element={<Analytics />} />
               </Route>
             </Route>
           </Routes>

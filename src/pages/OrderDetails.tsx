@@ -107,7 +107,8 @@ export default function OrderDetails() {
 
   const orderDate = parseDBDate(order.created_at);
   const subtotal = items.reduce((s, i) => s + i.quantity * i.selling_price, 0);
-  const discountAmt = subtotal - order.total_amount;
+  const orderAmt = Number(order.final_amount) || Number(order.total_amount) || 0;
+  const discountAmt = subtotal - orderAmt;
   const hasDiscount = discountAmt > 0.005;
   const status = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.active;
 
@@ -239,7 +240,7 @@ export default function OrderDetails() {
               )}
               <div className="border-t border-slate-100 pt-2.5 flex justify-between items-center">
                 <span className="font-bold text-slate-900 text-base">Total Paid</span>
-                <span className="text-xl font-extrabold text-blue-600">₹{order.total_amount.toFixed(2)}</span>
+                <span className="text-xl font-extrabold text-blue-600">₹{orderAmt.toFixed(2)}</span>
               </div>
             </div>
           </div>

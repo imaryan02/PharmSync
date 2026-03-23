@@ -55,7 +55,10 @@ export interface Order {
   clinic_id: string;
   created_by: string;
   patient_name: string | null;
-  total_amount: number;
+  // DB may use either column name — always read both with fallback
+  final_amount?: number | null;
+  total_amount?: number | null;
+  discount_amount?: number | null;
   status: 'active' | 'refunded' | 'cancelled';
   created_at: string;
 }

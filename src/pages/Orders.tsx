@@ -85,8 +85,9 @@ export default function Orders() {
     return orders.filter(o => parseDBDate(o.created_at).toDateString() === today);
   }, [orders]);
 
-  const todaySales = todayOrders.reduce((s, o) => s + o.total_amount, 0);
-  const avgOrder = orders.length ? orders.reduce((s, o) => s + o.total_amount, 0) / orders.length : 0;
+  const amt = (o: Order) => Number(o.final_amount) || Number(o.total_amount) || 0;
+  const todaySales = todayOrders.reduce((s, o) => s + amt(o), 0);
+  const avgOrder = orders.length ? orders.reduce((s, o) => s + amt(o), 0) / orders.length : 0;
 
   const filtered = useMemo(() => {
     const cutoff = startOf(dateFilter);
@@ -286,7 +287,7 @@ export default function Orders() {
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{dateLabel}</span>
                     <div className="flex-1 h-px bg-slate-200" />
                     <span className="text-xs text-slate-400 font-medium">
-                      ₹{dayOrders.reduce((s, o) => s + o.total_amount, 0).toFixed(2)}
+                      ₹{dayOrders.reduce((s, o) => s + amt(o), 0).toFixed(2)}
                     </span>
                   </div>
 
@@ -325,7 +326,7 @@ export default function Orders() {
 
                         {/* Amount + chevron */}
                         <div className="text-right shrink-0">
-                          <p className="text-base font-extrabold text-slate-900">₹{order.total_amount.toFixed(2)}</p>
+                           <p className="text-base font-extrabold text-slate-900">₹{amt(order).toFixed(2)}</p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
                       </Link>

@@ -20,6 +20,8 @@ export interface Medicine {
   category: string | null;
   division: string | null;
   company: string | null;
+  type: string | null;
+  pack_size: string | null;
   mrp: number | null;
   aliases: string[] | null;
   created_at: string;
@@ -32,6 +34,7 @@ export interface Batch {
   batch_code: string | null;
   expiry_date: string;
   quantity_remaining: number;
+  bonus_quantity: number | null;
   purchase_price: number | null;
   selling_price: number | null;
   mrp: number | null;

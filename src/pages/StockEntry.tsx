@@ -23,6 +23,7 @@ export default function StockEntry() {
   const [batchCode, setBatchCode] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [bonusQuantity, setBonusQuantity] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [sellingPrice, setSellingPrice] = useState('');
   const [mrp, setMrp] = useState('');
@@ -52,6 +53,7 @@ export default function StockEntry() {
     setBatchCode('');
     setExpiryDate('');
     setQuantity('');
+    setBonusQuantity('');
     setPurchasePrice('');
     setSellingPrice('');
     setMrp('');
@@ -102,6 +104,7 @@ export default function StockEntry() {
             medicine_id: medicineId,
             batch_id: batchData.id,
             quantity: qty,
+            bonus_quantity: bonusQuantity ? parseInt(bonusQuantity) : 0,
             // created_by omitted — FK references employees table, not auth.users
           }
         ]);
@@ -290,6 +293,26 @@ export default function StockEntry() {
                     onChange={(e) => setQuantity(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
                     placeholder="Enter quantity"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="bonusQuantity" className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Bonus Quantity <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <CheckCircle2 className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    type="number"
+                    id="bonusQuantity"
+                    min="0"
+                    value={bonusQuantity}
+                    onChange={(e) => setBonusQuantity(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
+                    placeholder="Enter bonus quantity"
                   />
                 </div>
               </div>

@@ -68,8 +68,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
+      <div className="sm:mx-auto w-full sm:max-w-md">
         <div className="flex justify-center">
           <Activity className="h-12 w-12 text-blue-600" />
         </div>
@@ -81,8 +81,8 @@ export default function ResetPassword() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm sm:rounded-xl sm:px-10 border border-slate-200">
+      <div className="mt-8 sm:mx-auto w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow-xl shadow-slate-200/40 rounded-2xl sm:px-10 border border-slate-200 mx-auto max-w-lg">
           {success ? (
             <div className="rounded-md bg-green-50 p-4">
               <div className="flex">

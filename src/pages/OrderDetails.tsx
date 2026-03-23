@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../hooks/useAuth';
 import { useStore } from '../store/useStore';
 import { Order, OrderItem, Medicine } from '../types';
-import { ArrowLeft, RefreshCcw, AlertCircle, ShoppingBag, Calendar, Clock, Receipt } from 'lucide-react';
+import {
+  ArrowLeft, RefreshCcw, AlertCircle, Calendar, Clock,
+  Receipt, User, Tag, Loader2, Printer,
+} from 'lucide-react';
 
 interface OrderItemWithMedicine extends OrderItem {
   medicines: Medicine;
 }
 
+// ─── Helpers ───────────────────────────────────────────────────────────────
+const STATUS_CONFIG = {
+  active:    { label: 'Completed', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  refunded:  { label: 'Refunded',  cls: 'bg-amber-100 text-amberald-700 border-amber-200' },
+  cancelled: { label: 'Cancelled', cls: 'bg-red-100 text-red-700 border-red-200' },
+};
+
 export default function OrderDetails() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
   const { activeStore } = useStore();
   const navigate = useNavigate();
 
@@ -22,66 +30,45 @@ export default function OrderDetails() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && activeStore && id) {
-      fetchOrderDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [user, activeStore, id]);
+    if (activeStore && id) fetchOrderDetails();
+    else setLoading(false);
+  }, [activeStore, id]);
 
   const fetchOrderDetails = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch order
-      const { data: orderData, error: orderError } = await supabase
+      const { data: orderData, error: orderErr } = await supabase
         .from('orders')
         .select('*')
         .eq('id', id)
         .eq('clinic_id', activeStore?.id)
         .single();
-
-      if (orderError) throw orderError;
-      if (!orderData) throw new Error('Order not found');
+      if (orderErr) throw orderErr;
       setOrder(orderData as Order);
 
-      // Fetch order items
-      const { data: itemsData, error: itemsError } = await supabase
+      const { data: itemsData, error: itemsErr } = await supabase
         .from('order_items')
-        .select(`
-          *,
-          medicines (
-            id,
-            name,
-            company,
-            composition
-          )
-        `)
+        .select(`*, medicines(id, name, company, composition, type, pack_size)`)
         .eq('order_id', id);
-
-      if (itemsError) throw itemsError;
+      if (itemsErr) throw itemsErr;
       setItems(itemsData as OrderItemWithMedicine[]);
     } catch (err: any) {
-      console.error('Error fetching order details:', err);
-      setError(err.message || 'Failed to load order details');
+      setError(err.message || 'Failed to load order');
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Guard states ─────────────────────────────────────────────────────────
   if (!activeStore) {
     return (
-      <div className="w-full flex-1 flex flex-col">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+      <div className="w-full flex-1 flex items-center justify-center p-6">
+        <div className="max-w-sm w-full bg-white rounded-2xl border border-slate-200 p-8 text-center">
           <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">No Store Selected</h2>
-          <p className="text-slate-600 mb-6">
-            Please select an active store from the dashboard to view order details.
-          </p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
+          <button onClick={() => navigate('/dashboard')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700">
             Go to Dashboard
           </button>
         </div>
@@ -91,26 +78,22 @@ export default function OrderDetails() {
 
   if (loading) {
     return (
-      <div className="w-full flex-1 flex flex-col">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="w-full flex-1 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="w-full flex-1 flex flex-col">
-        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center border-dashed">
+      <div className="w-full flex-1 flex items-center justify-center p-6">
+        <div className="max-w-sm w-full bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center">
           <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Order Not Found</h2>
-          <p className="text-slate-600 mb-6">
-            {error || "The order you are looking for does not exist or you don't have permission to view it."}
-          </p>
-          <button
-            onClick={() => navigate('/orders')}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Orders
+          <p className="text-slate-500 text-sm mb-6">{error || 'This order does not exist.'}</p>
+          <button onClick={() => navigate('/orders')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700">
+            Back to Transactions
           </button>
         </div>
       </div>
@@ -118,110 +101,162 @@ export default function OrderDetails() {
   }
 
   const orderDate = new Date(order.created_at);
+  const subtotal = items.reduce((s, i) => s + i.quantity * i.selling_price, 0);
+  const discountAmt = subtotal - order.total_amount;
+  const hasDiscount = discountAmt > 0.005;
+  const status = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.active;
 
   return (
-    <div className="w-full flex-1 flex flex-col">
-      <div className="bg-transparent mt-2 mb-4">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/orders')} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600">
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <h1 className="text-xl font-bold text-slate-900">Order Details</h1>
-          </div>
-          {order.status !== 'refunded' && order.status !== 'cancelled' && (
-            <Link
-              to={`/orders/${order.id}/refund`}
-              className="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
-            >
-              <RefreshCcw className="h-4 w-4 mr-1.5" />
-              Refund
+    <div className="w-full flex-1 flex flex-col bg-slate-50">
+
+      {/* ── Header ── */}
+      <div className="bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+          <button onClick={() => navigate('/orders')}
+            className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-base font-bold text-slate-900 flex-1">
+            #{order.id.slice(0, 8).toUpperCase()}
+          </h1>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${status.cls}`}>
+            {status.label}
+          </span>
+          {order.status === 'active' && (
+            <Link to={`/orders/${order.id}/refund`}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+              <RefreshCcw className="h-3.5 w-3.5" /> Refund
             </Link>
           )}
         </div>
       </div>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Order Summary Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-slate-400" />
-              <span className="font-semibold text-slate-900 text-lg">
-                #{order.id.slice(0, 8).toUpperCase()}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="block text-2xl font-bold text-slate-900">
-                ₹{order.total_amount.toFixed(2)}
-              </span>
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Total Amount
-              </span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Calendar className="h-4 w-4 text-slate-400" />
-              {orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Clock className="h-4 w-4 text-slate-400" />
-              {orderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-            </div>
-            <div className="col-span-2 flex items-center gap-2 text-sm">
-              <span className="text-slate-500">Status:</span>
-              <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${
-                order.status === 'active' ? 'bg-green-100 text-green-700' :
-                order.status === 'refunded' ? 'bg-amber-100 text-amber-700' :
-                'bg-red-100 text-red-700'
-              }`}>
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </span>
-            </div>
-          </div>
-        </div>
+      {/* ── Body ── */}
+      <div className="flex-1 overflow-y-auto pb-24">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 space-y-4">
 
-        {/* Order Items */}
-        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 px-1">
-          Items Ordered
-        </h3>
-        <div className="space-y-3">
-          {items.map((item) => (
-            <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-slate-900 text-base truncate">{item.medicines.name}</h4>
-                {item.medicines.company && (
-                  <p className="text-xs text-slate-500 truncate">{item.medicines.company}</p>
-                )}
-                <div className="flex items-center gap-3 mt-2 text-sm text-slate-600">
-                  <span className="font-medium bg-slate-100 px-2 py-0.5 rounded-md">
-                    Qty: {item.quantity}
-                  </span>
-                  <span>@ ₹{item.selling_price.toFixed(2)}</span>
+          {/* ── Customer + date card ── */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100">
+            {/* Customer */}
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
+                <User className="h-4 w-4 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Customer</p>
+                <p className="text-sm font-semibold text-slate-900 mt-0.5">
+                  {order.patient_name || 'Walk-in Customer'}
+                </p>
+              </div>
+            </div>
+            {/* Date */}
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
+                <Calendar className="h-4 w-4 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date & Time</p>
+                <p className="text-sm font-semibold text-slate-900 mt-0.5">
+                  {orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {' · '}
+                  {orderDate.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                </p>
+              </div>
+            </div>
+            {/* Order ID */}
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
+                <Tag className="h-4 w-4 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Order ID</p>
+                <p className="text-sm font-mono font-semibold text-slate-900 mt-0.5">{order.id}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Items ── */}
+          <div>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">
+              Items ({items.length})
+            </p>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden">
+              {items.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-6">No items found.</p>
+              ) : (
+                items.map(item => {
+                  const lineTotal = item.quantity * item.selling_price;
+                  const med = item.medicines;
+                  return (
+                    <div key={item.id} className="flex items-start gap-3 px-4 py-3.5">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{med.name}</p>
+                        {med.company && (
+                          <p className="text-xs text-slate-400 truncate">{med.company}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {med.type && (
+                            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">{med.type}</span>
+                          )}
+                          {med.pack_size && (
+                            <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">{med.pack_size}</span>
+                          )}
+                          <span className="text-xs text-slate-500">
+                            {item.quantity} × ₹{item.selling_price.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="font-bold text-slate-900">₹{lineTotal.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* ── Bill summary ── */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Bill Summary</p>
+            </div>
+            <div className="p-4 space-y-2.5">
+              <div className="flex justify-between text-sm text-slate-600">
+                <span>Subtotal ({items.length} item{items.length !== 1 ? 's' : ''})</span>
+                <span className="font-semibold text-slate-900">₹{subtotal.toFixed(2)}</span>
+              </div>
+              {hasDiscount && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-600">Discount</span>
+                  <span className="font-semibold text-green-600">−₹{discountAmt.toFixed(2)}</span>
                 </div>
-              </div>
-              <div className="text-right shrink-0">
-                <span className="block font-bold text-slate-900 text-lg">
-                  ₹{(item.quantity * item.selling_price).toFixed(2)}
-                </span>
+              )}
+              <div className="border-t border-slate-100 pt-2.5 flex justify-between items-center">
+                <span className="font-bold text-slate-900 text-base">Total Paid</span>
+                <span className="text-xl font-extrabold text-blue-600">₹{order.total_amount.toFixed(2)}</span>
               </div>
             </div>
-          ))}
-        </div>
-      </main>
+          </div>
 
-      {/* Mobile Sticky Bottom Bar for Refund */}
-      {order.status !== 'refunded' && order.status !== 'cancelled' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 sm:hidden">
-          <div className="max-w-3xl mx-auto">
+        </div>
+      </div>
+
+      {/* ── Sticky action footer ── */}
+      {order.status === 'active' && (
+        <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 flex gap-3">
+            <button
+              onClick={() => window.print()}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+              <Printer className="h-4 w-4" />
+              Print Bill
+            </button>
             <Link
               to={`/orders/${order.id}/refund`}
-              className="w-full flex justify-center items-center py-3.5 px-4 border border-slate-300 rounded-xl shadow-sm text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
-            >
-              <RefreshCcw className="h-5 w-5 mr-2" />
-              Refund Items
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-amber-300 bg-amber-50 text-sm font-bold text-amber-700 hover:bg-amber-100 transition-colors">
+              <RefreshCcw className="h-4 w-4" />
+              Refund
             </Link>
           </div>
         </div>

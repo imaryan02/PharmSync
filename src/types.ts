@@ -54,6 +54,7 @@ export interface Order {
   id: string;
   clinic_id: string;
   created_by: string;
+  patient_name: string | null;
   total_amount: number;
   status: 'active' | 'refunded' | 'cancelled';
   created_at: string;

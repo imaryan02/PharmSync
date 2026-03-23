@@ -17,8 +17,8 @@ export default function MedicineCard({ medicine, onEdit, onDelete }: MedicineCar
           <Pill className="h-6 w-6" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start gap-2">
-            <h3 className="font-bold text-slate-900 truncate text-lg pr-2">{medicine.name}</h3>
+          <div className="flex justify-between items-start gap-2 min-w-0">
+            <h3 className="font-bold text-slate-900 truncate text-lg pr-2 flex-1 min-w-0">{medicine.name}</h3>
             <div className="flex items-center gap-2 shrink-0">
               {medicine.mrp && (
                 <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium whitespace-nowrap">
@@ -45,16 +45,16 @@ export default function MedicineCard({ medicine, onEdit, onDelete }: MedicineCar
           </div>
           
           {medicine.company && (
-            <div className="flex items-center gap-1.5 mt-1.5 text-slate-500 text-sm">
+            <div className="flex items-center gap-1.5 mt-1.5 text-slate-500 text-sm min-w-0">
               <Building2 className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{medicine.company}</span>
+              <span className="truncate flex-1 min-w-0">{medicine.company}</span>
             </div>
           )}
           
           {medicine.composition && (
-            <div className="flex items-start gap-1.5 mt-1.5 text-slate-500 text-sm">
+            <div className="flex items-start gap-1.5 mt-1.5 text-slate-500 text-sm min-w-0">
               <Beaker className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              <span className="line-clamp-2 leading-snug">{medicine.composition}</span>
+              <span className="line-clamp-2 leading-snug flex-1 min-w-0">{medicine.composition}</span>
             </div>
           )}
         </div>

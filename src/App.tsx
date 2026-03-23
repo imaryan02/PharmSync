@@ -21,7 +21,6 @@ import Medicines from './pages/Medicines';
 import AddMedicine from './pages/AddMedicine';
 import StockEntry from './pages/StockEntry';
 import Inventory from './pages/Inventory';
-import InventoryHub from './pages/InventoryHub';
 import CreateOrder from './pages/CreateOrder';
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
@@ -55,8 +54,7 @@ export default function App() {
               <Route path="/medicines/new" element={<AddMedicine />} />
               <Route path="/medicines/:id/edit" element={<EditMedicine />} />
               <Route path="/stock-entry" element={<StockEntry />} />
-              <Route path="/inventory" element={<InventoryHub />} />
-              <Route path="/inventory-classic" element={<Inventory />} />
+              <Route path="/inventory" element={<Inventory />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/orders/new" element={<CreateOrder />} />
               <Route path="/orders/:id" element={<OrderDetails />} />

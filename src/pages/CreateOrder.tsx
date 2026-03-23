@@ -161,16 +161,47 @@ export default function CreateOrder() {
 
   // ── Submit ────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!activeStore || !user || cart.length === 0) return;
+    if (!activeStore || !user) return;
+    
+    // 1. Cart Empty
+    if (cart.length === 0) {
+      showError("Your cart is empty. Please add items before submitting.");
+      return;
+    }
 
-    // Validate quantities
+    // 2. Customer Phone Validation
+    if (customerPhone.trim() && !/^\d{10}$/.test(customerPhone.trim())) {
+      showError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    // 3. Discount Validation
+    if (billing.discountAmount > billing.subtotal) {
+      showError("Discount cannot exceed the subtotal amount.");
+      return;
+    }
+    if (billing.finalTotal < 0) {
+      showError("Final total cannot be negative.");
+      return;
+    }
+
+    // 4. Cart Items Validation
     for (const item of cart) {
+      if (!item.quantity || item.quantity <= 0 || isNaN(item.quantity)) {
+        showError(`Please enter a valid quantity for "${item.name}".`);
+        return;
+      }
+      if (item.price === undefined || item.price < 0 || isNaN(item.price)) {
+        showError(`Please enter a valid price for "${item.name}".`);
+        return;
+      }
+
       const availPacks = item.selected_batch_id
         ? (item.batches.find(b => b.id === item.selected_batch_id)?.quantity_remaining ?? item.available_quantity)
         : item.available_quantity;
       const needed = packsConsumed(item.unit, item.quantity, item.pack);
-      if (item.quantity <= 0 || needed > availPacks) {
-        showError(`Not enough stock for "${item.name}"`);
+      if (needed > availPacks) {
+        showError(`Not enough stock for "${item.name}". Only ${availPacks} packs available.`);
         return;
       }
     }

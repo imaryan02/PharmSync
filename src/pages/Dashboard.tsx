@@ -229,7 +229,7 @@ export default function Dashboard() {
                 />
                 <QuickActionCard
                   title="Medicines"
-                  to="/inventory?tab=medicines"
+                  to="/medicines"
                   icon={Pill}
                   colorClass="bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"
                 />
@@ -297,7 +297,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-900">Inventory Snapshot</h2>
                 <div className="flex items-center gap-3">
-                  <Link to="/inventory?tab=medicines" className="text-sm font-medium text-slate-500 hover:text-slate-700">
+                  <Link to="/medicines" className="text-sm font-medium text-slate-500 hover:text-slate-700">
                     Medicines
                   </Link>
                   <Link to="/inventory" className="text-sm font-bold text-blue-600 hover:text-blue-700">

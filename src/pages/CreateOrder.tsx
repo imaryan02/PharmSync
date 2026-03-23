@@ -170,8 +170,8 @@ export default function CreateOrder() {
     }
 
     // 2. Customer Phone Validation
-    if (customerPhone.trim() && !/^\d{10}$/.test(customerPhone.trim())) {
-      showError("Please enter a valid 10-digit mobile number.");
+    if (customerPhone.trim() && !/^[6-9]\d{9}$/.test(customerPhone.trim())) {
+      showError("Mobile number must be 10 digits and start with 6, 7, 8, or 9.");
       return;
     }
 
@@ -216,6 +216,7 @@ export default function CreateOrder() {
           total_amount: billing.finalTotal,
           status: 'active',
           patient_name: customerName.trim() || null,
+          created_at: new Date().toISOString(),
         }])
         .select()
         .single();
@@ -380,7 +381,11 @@ export default function CreateOrder() {
               </div>
               <div className="relative">
                 <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                <input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)}
+                <input type="tel" value={customerPhone} 
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setCustomerPhone(val);
+                  }}
                   placeholder="Mobile number"
                   className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-slate-400" />
               </div>
@@ -476,7 +481,7 @@ export default function CreateOrder() {
 
       {/* ── Sticky footer ── */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] sm:bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
             <div className="flex flex-col leading-tight">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</span>

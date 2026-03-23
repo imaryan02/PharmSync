@@ -27,11 +27,16 @@ function startOf(filter: DateFilter): Date | null {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+function parseDBDate(isoStr: string) {
+  if (!isoStr) return new Date();
+  return new Date(isoStr.endsWith('Z') || isoStr.includes('+') ? isoStr : isoStr + 'Z');
+}
+
 function fmtTime(isoStr: string) {
-  return new Date(isoStr).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return parseDBDate(isoStr).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 function fmtDate(isoStr: string) {
-  const d = new Date(isoStr);
+  const d = parseDBDate(isoStr);
   const today = new Date();
   if (d.toDateString() === today.toDateString()) return 'Today';
   const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
@@ -77,7 +82,7 @@ export default function Orders() {
   // ── Derived data ────────────────────────────────────────────────────────
   const todayOrders = useMemo(() => {
     const today = new Date().toDateString();
-    return orders.filter(o => new Date(o.created_at).toDateString() === today);
+    return orders.filter(o => parseDBDate(o.created_at).toDateString() === today);
   }, [orders]);
 
   const todaySales = todayOrders.reduce((s, o) => s + o.total_amount, 0);
@@ -87,7 +92,7 @@ export default function Orders() {
     const cutoff = startOf(dateFilter);
     const q = search.toLowerCase().trim();
     return orders.filter(o => {
-      if (cutoff && new Date(o.created_at) < cutoff) return false;
+      if (cutoff && parseDBDate(o.created_at) < cutoff) return false;
       if (statusFilter !== 'all' && o.status !== statusFilter) return false;
       if (q) {
         const matchName = o.patient_name?.toLowerCase().includes(q);

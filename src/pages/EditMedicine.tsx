@@ -113,6 +113,19 @@ export default function EditMedicine() {
 
       if (updateError) throw updateError;
 
+      // Audit log
+      try {
+        await supabase.from('audit_logs').insert([{
+          action: 'Medicine updated',
+          entity_type: 'medicines',
+          user_id: user?.id,
+          actor_type: 'owner',
+          metadata: { medicine_name: name.trim(), type, pack_size: packSize.trim() }
+        }]);
+      } catch (auditErr) {
+        console.warn('Audit log skipped:', auditErr);
+      }
+
       showSuccess('Medicine updated successfully!');
       navigate('/medicines');
     } catch (err: any) {

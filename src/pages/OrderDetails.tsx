@@ -100,7 +100,12 @@ export default function OrderDetails() {
     );
   }
 
-  const orderDate = new Date(order.created_at);
+  const parseDBDate = (isoStr: string) => {
+    if (!isoStr) return new Date();
+    return new Date(isoStr.endsWith('Z') || isoStr.includes('+') ? isoStr : isoStr + 'Z');
+  };
+
+  const orderDate = parseDBDate(order.created_at);
   const subtotal = items.reduce((s, i) => s + i.quantity * i.selling_price, 0);
   const discountAmt = subtotal - order.total_amount;
   const hasDiscount = discountAmt > 0.005;

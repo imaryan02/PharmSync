@@ -9,9 +9,14 @@ interface OrderListItemProps {
 }
 
 export default function OrderListItem({ order }: OrderListItemProps) {
-  const date = new Date(order.created_at);
-  const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const parseDBDate = (isoStr: string) => {
+    if (!isoStr) return new Date();
+    return new Date(isoStr.endsWith('Z') || isoStr.includes('+') ? isoStr : isoStr + 'Z');
+  };
+
+  const date = parseDBDate(order.created_at);
+  const formattedTime = date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+  const formattedDate = date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
 
   return (
     <Link

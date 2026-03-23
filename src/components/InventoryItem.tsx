@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SmartInventory } from '../pages/Inventory';
 import { supabase } from '../lib/supabaseClient';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../hooks/useAuth';
 import { ChevronDown, ChevronUp, Pill, Building2, AlertTriangle, IndianRupee, Clock, Plus, Trash2, Pencil } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BatchEditModal from './BatchEditModal';
@@ -14,6 +15,7 @@ interface InventoryItemProps {
 }
 
 export default function InventoryItem({ item, onRefresh }: InventoryItemProps) {
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -58,6 +60,23 @@ export default function InventoryItem({ item, onRefresh }: InventoryItemProps) {
 
       const newTotal = Math.max(0, item.total_quantity - batch.quantity_remaining);
       await supabase.from('inventory').update({ total_quantity: newTotal }).eq('id', item.id);
+
+      // Audit log
+      try {
+        await supabase.from('audit_logs').insert([{
+          action: 'Batch deleted',
+          entity_type: 'inventory',
+          user_id: user?.id,
+          actor_type: 'owner',
+          metadata: { 
+            batch_code: batch.batch_code || null, 
+            quantity_removed: batch.quantity_remaining,
+            medicine_name: medicine.name
+          }
+        }]);
+      } catch (auditErr) {
+        console.warn('Audit log skipped:', auditErr);
+      }
 
       showSuccess('Batch deleted permanently.');
       onRefresh();

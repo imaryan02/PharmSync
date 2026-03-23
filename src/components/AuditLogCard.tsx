@@ -43,6 +43,11 @@ export default function AuditLogCard({ log }: AuditLogCardProps) {
     );
   };
 
+  const parseDBDate = (isoStr: string) => {
+    if (!isoStr) return new Date();
+    return new Date(isoStr.endsWith('Z') || isoStr.includes('+') ? isoStr : isoStr + 'Z');
+  };
+
   return (
     <div className="bg-white border text-left border-slate-200 rounded-xl p-4 shadow-sm flex items-start gap-4">
       <div className="mt-1 bg-slate-50 p-2 rounded-lg shrink-0">
@@ -54,8 +59,8 @@ export default function AuditLogCard({ log }: AuditLogCardProps) {
           <h3 className="text-base font-semibold text-slate-900 truncate">{log.action}</h3>
           <span className="shrink-0 text-xs text-slate-500 flex items-center gap-1 relative top-1">
             <Clock className="h-3 w-3" />
-            {new Date(log.created_at).toLocaleString([], {
-              month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            {parseDBDate(log.created_at).toLocaleString([], {
+               month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
             })}
           </span>
         </div>

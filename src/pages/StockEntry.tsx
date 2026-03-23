@@ -141,8 +141,21 @@ export default function StockEntry() {
               total_quantity: qty,
             }
           ]);
-        
         if (insertError) throw insertError;
+      }
+
+      // Audit log
+      try {
+        const medName = medicines.find(m => m.id === medicineId)?.name || 'Unknown Medicine';
+        await supabase.from('audit_logs').insert([{
+          action: 'Stock entered',
+          entity_type: 'inventory',
+          user_id: user?.id,
+          actor_type: 'owner',
+          metadata: { medicine_name: medName, batch_code: batchCode.trim() || null, quantity: qty }
+        }]);
+      } catch (auditErr) {
+        console.warn('Audit log skipped:', auditErr);
       }
 
       showSuccess('Stock added successfully!');

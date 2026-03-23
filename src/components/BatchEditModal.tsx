@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { Batch } from '../types';
 import { Hash, Calendar, Package, IndianRupee, X, CheckCircle2 } from 'lucide-react';
@@ -13,6 +14,7 @@ interface BatchEditModalProps {
 }
 
 export default function BatchEditModal({ batch, clinicId, medicineId, onClose, onSuccess }: BatchEditModalProps) {
+  const { user } = useAuth();
   const { error: showError, success: showSuccess } = useToast();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -73,6 +75,23 @@ export default function BatchEditModal({ batch, clinicId, medicineId, onClose, o
             .eq('id', inv.id);
           if (updErr) throw updErr;
         }
+      }
+
+      // 3. Audit log
+      try {
+        await supabase.from('audit_logs').insert([{
+          action: 'Batch updated',
+          entity_type: 'inventory',
+          user_id: user?.id,
+          actor_type: 'owner',
+          metadata: { 
+            batch_code: form.batch_code.trim() || null, 
+            quantity_change: diff,
+            new_quantity: qty
+          }
+        }]);
+      } catch (auditErr) {
+        console.warn('Audit log skipped:', auditErr);
       }
 
       showSuccess('Batch updated successfully!');

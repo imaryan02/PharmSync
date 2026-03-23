@@ -39,22 +39,22 @@ export default function StoreSelector() {
   if (stores.length === 0) return null;
 
   return (
-    <div className="relative">
+    <div className="relative ml-2 sm:ml-0 flex-1 min-w-0 sm:flex-none">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors w-full"
       >
-        <Store className="h-4 w-4 text-slate-500" />
-        <span className="text-sm font-medium text-slate-700 truncate max-w-[120px] sm:max-w-[200px]">
+        <Store className="h-4 w-4 text-slate-500 shrink-0" />
+        <span className="text-sm font-bold text-slate-800 truncate text-left w-full sm:w-auto sm:max-w-[200px]">
           {activeStore?.name || 'Select Store'}
         </span>
-        <ChevronDown className="h-4 w-4 text-slate-400" />
+        <ChevronDown className="h-4 w-4 text-slate-400 shrink-0 ml-auto sm:ml-0" />
       </button>
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 z-20 py-1 overflow-hidden">
+          <div className="fixed inset-0 z-40 bg-black/5 sm:bg-transparent" onClick={() => setIsOpen(false)} />
+          <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-[calc(100vw-32px)] sm:w-64 max-w-sm bg-white rounded-xl shadow-xl shadow-black/5 border border-slate-100 z-50 py-1 overflow-hidden origin-top-left sm:origin-top-right">
             <div className="px-3 py-2 border-b border-slate-50">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Your Stores</p>
             </div>
